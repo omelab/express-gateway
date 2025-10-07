@@ -1,0 +1,27 @@
+{
+  "name": "express-gateway-api",
+  "version": "1.0.0",
+  "description": "API Gateway built with Express Gateway",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "concurrently \"node health-service.js\" \"node server.js\"",
+    "health": "node health-service.js",
+    "gateway": "node server.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "concurrently": "^7.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "express-gateway": "^1.16.11",
+    "js-yaml": "^4.1.0"
+  },
+  "keywords": [
+    "api-gateway",
+    "express-gateway",
+    "microservices"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

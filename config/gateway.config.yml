@@ -1,0 +1,173 @@
+http:
+  port: ${GATEWAY_HTTP_PORT:-8080}
+
+apiEndpoints:
+  health:
+    host: '*'
+    paths: 
+      - '/health'
+      - '/status'
+      - '/'
+      
+  auth:
+    host: '*'
+    paths: 
+      - '/auth/*'
+      - '/login'
+      - '/register'
+      
+  users:
+    host: '*'
+    paths: 
+      - '/users/*'
+      - '/profile/*'
+      
+  products:
+    host: '*'
+    paths: 
+      - '/products/*'
+      - '/categories/*'
+      
+  orders:
+    host: '*'
+    paths: 
+      - '/orders/*'
+      - '/cart/*'
+
+serviceEndpoints:
+  health-service:
+    url: ${HEALTH_SERVICE_URL:-http://localhost:3005}
+    
+  auth-service:
+    url: ${AUTH_SERVICE_URL:-http://localhost:3001}
+    
+  user-service:
+    url: ${USER_SERVICE_URL:-http://localhost:3002}
+    
+  product-service:
+    url: ${PRODUCT_SERVICE_URL:-http://localhost:3003}
+    
+  order-service:
+    url: ${ORDER_SERVICE_URL:-http://localhost:3004}
+
+policies:
+  - proxy
+  - rate-limit
+  - cors
+  - log
+
+pipelines:
+  # Health Check Pipeline - Points to our health service
+  healthPipeline:
+    apiEndpoints:
+      - health
+    policies:
+      - log:
+          - action:
+              message: "Health check requested - ${req.path}"
+      - cors:
+          - action:
+              origin: "*"
+              methods: 
+                - GET
+                - OPTIONS
+      - proxy:
+          - action:
+              serviceEndpoint: health-service
+              changeOrigin: true
+                
+  # Authentication Pipeline (Public)
+  authPipeline:
+    apiEndpoints:
+      - auth
+    policies:
+      - log:
+          - action:
+              message: "Authentication request"
+      - cors:
+          - action:
+              origin: "*"
+              methods: 
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+      - proxy:
+          - action:
+              serviceEndpoint: auth-service
+              changeOrigin: true
+                
+  # Users Pipeline (Protected at service level)
+  usersPipeline:
+    apiEndpoints:
+      - users
+    policies:
+      - log:
+          - action:
+              message: "User service request"
+      - cors:
+          - action:
+              origin: "*"
+              methods: 
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+      - rate-limit:
+          - action:
+              max: ${RATE_LIMIT_MAX_REQUESTS:-100}
+              windowMs: ${RATE_LIMIT_WINDOW_MS:-900000}
+      - proxy:
+          - action:
+              serviceEndpoint: user-service
+              changeOrigin: true
+                
+  # Products Pipeline (Public)
+  productsPipeline:
+    apiEndpoints:
+      - products
+    policies:
+      - log:
+          - action:
+              message: "Product service request"
+      - cors:
+          - action:
+              origin: "*"
+              methods: 
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+      - proxy:
+          - action:
+              serviceEndpoint: product-service
+              changeOrigin: true
+                        
+  # Orders Pipeline (Protected at service level)
+  ordersPipeline:
+    apiEndpoints:
+      - orders
+    policies:
+      - log:
+          - action:
+              message: "Order service request"
+      - cors:
+          - action:
+              origin: "*"
+              methods: 
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+      - rate-limit:
+          - action:
+              max: ${RATE_LIMIT_MAX_REQUESTS:-100}
+              windowMs: ${RATE_LIMIT_WINDOW_MS:-900000}
+      - proxy:
+          - action:
+              serviceEndpoint: order-service
+              changeOrigin: true
