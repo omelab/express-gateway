@@ -27,8 +27,8 @@ A complete, production-ready API Gateway built with Express Gateway.
 
 1. **Clone and install:**
 ```bash
-git clone <repository>
-cd express-gateway-project
+git clone <https://github.com/omelab/express-gateway>
+cd express-gateway
 npm install
 ```
 
