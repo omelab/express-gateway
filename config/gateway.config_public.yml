@@ -1,10 +1,6 @@
 http:
   port: ${GATEWAY_HTTP_PORT:-8080}
 
-admin:
-  port: ${GATEWAY_ADMIN_PORT:-9876}
-  host: localhost
-
 apiEndpoints:
   health:
     host: '*'
@@ -57,7 +53,6 @@ serviceEndpoints:
 policies:
   - proxy
   - rate-limit
-  - jwt
   - cors
   - log
 
@@ -103,7 +98,7 @@ pipelines:
               serviceEndpoint: auth-service
               changeOrigin: true
                 
-  # Users Pipeline (Protected)
+  # Users Pipeline (Protected at service level)
   usersPipeline:
     apiEndpoints:
       - users
@@ -120,9 +115,6 @@ pipelines:
                 - PUT
                 - DELETE
                 - OPTIONS
-      - jwt:
-          - action:
-              secretOrPublicKey: ${JWT_SECRET:-default-jwt-secret-change-in-production}
       - rate-limit:
           - action:
               max: ${RATE_LIMIT_MAX_REQUESTS:-100}
@@ -154,7 +146,7 @@ pipelines:
               serviceEndpoint: product-service
               changeOrigin: true
                         
-  # Orders Pipeline (Protected)
+  # Orders Pipeline (Protected at service level)
   ordersPipeline:
     apiEndpoints:
       - orders
@@ -171,9 +163,6 @@ pipelines:
                 - PUT
                 - DELETE
                 - OPTIONS
-      - jwt:
-          - action:
-              secretOrPublicKey: ${JWT_SECRET:-default-jwt-secret-change-in-production}
       - rate-limit:
           - action:
               max: ${RATE_LIMIT_MAX_REQUESTS:-100}
